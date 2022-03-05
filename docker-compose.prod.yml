@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+  activities_prod_db:
+    image: postgres:10.15-alpine
+    restart: always
+    container_name: activities_prod_db
+    environment:
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_USER: ${DB_USER}
+        POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - /var/lib/postgresql/activities-prod-docker:/var/lib/postgresql/data
+    networks:
+      activities_prod_net:
+        ipv4_address: 172.19.0.2
+
+  activities_prod_api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: bash -c "python manage.py collectstatic --no-input;
+      python manage.py migrate;
+      gunicorn activities.wsgi:application -b 0.0.0.0:8000"
+    volumes:
+      - ./api/staticfiles:/code/staticfiles
+      - ./api/media:/code/media
+    image: activities-prod-api:latest
+    restart: always
+    container_name: activities_prod_api
+    env_file:
+      - .env
+    links:
+      - activities_prod_db:postgres
+    depends_on:
+      - activities_prod_db
+    networks:
+      activities_prod_net:
+        ipv4_address: 172.19.0.3
+
+networks:
+  activities_prod_net:
+    name: activities_prod_net
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.19.0.0/29
+
+
