@@ -23,11 +23,11 @@ class AbstractCommonInfo(models.Model):
 
 class AbstractCreatedUpdatedAt(models.Model):
     created_at = models.DateTimeField(
-        auto_now_add=False,
+        auto_now_add=True,
         verbose_name=_("Created at"),
     )
     updated_at = models.DateTimeField(
-        auto_now=False,
+        auto_now=True,
         verbose_name=_("Updated at"),
     )
 

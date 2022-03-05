@@ -67,7 +67,7 @@ class Survey(AbstractCreatedUpdatedAt):
     updated_at = None
 
     def __str__(self):
-        return self.activity
+        return str(self.activity)
 
     class Meta:
         verbose_name = _("Survey")
