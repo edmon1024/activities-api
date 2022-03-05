@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-05 15:28-0600\n"
+"POT-Creation-Date: 2022-03-05 16:33-0600\n"
 "PO-Revision-Date: 2022-03-05 15:25-0600\n"
 "Last-Translator: Edmundo Andrade <edmon.af@gmail.com>\n"
 "Language-Team: Edmundo Andrade <edmon.af@gmail.com>\n"
@@ -45,26 +45,42 @@ msgstr "Descripción"
 msgid "Disabled at"
 msgstr "Desactivado en"
 
-#: activities/models.py:33
+#: activities/models.py:27 activities/models.py:37
 msgid "Property"
 msgstr "Propiedad"
 
-#: activities/models.py:37
+#: activities/models.py:28
+msgid "Properties"
+msgstr "Propiedades"
+
+#: activities/models.py:41
 msgid "Schedule"
 msgstr "Horario"
 
-#: activities/models.py:47
+#: activities/models.py:45 activities/models.py:55
 msgid "Activity"
 msgstr "Actividad"
 
-#: activities/models.py:51
+#: activities/models.py:46
+msgid "Activities"
+msgstr "Actividades"
+
+#: activities/models.py:59
 msgid "Answers"
 msgstr "Respuestas"
 
-#: project/settings.py:121
+#: activities/models.py:64
+msgid "Survey"
+msgstr "Encuesta"
+
+#: activities/models.py:65
+msgid "Surveys"
+msgstr "Encuestas"
+
+#: project/settings.py:123
 msgid "English"
 msgstr "Inglés"
 
-#: project/settings.py:122
+#: project/settings.py:124
 msgid "Spanish"
 msgstr "Español"

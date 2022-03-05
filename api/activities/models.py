@@ -23,6 +23,13 @@ class Property(AbstractCommonInfo, AbstractCreatedUpdatedAt):
         verbose_name=_("Disabled at"),
     )
 
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = _("Property")
+        verbose_name_plural = _("Properties")
+
 
 class Activity(AbstractCommonInfo, AbstractCreatedUpdatedAt):
     property = models.ForeignKey(
@@ -37,6 +44,13 @@ class Activity(AbstractCommonInfo, AbstractCreatedUpdatedAt):
         verbose_name=_("Schedule"),
     )
 
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = _("Activity")
+        verbose_name_plural = _("Activities")
+
 
 class Survey(AbstractCreatedUpdatedAt):
     activity = models.OneToOneField(
@@ -50,6 +64,13 @@ class Survey(AbstractCreatedUpdatedAt):
         null=False,
         verbose_name=_("Answers"),
     )
+    updated_at = None
 
+    def __str__(self):
+        return self.activity
+
+    class Meta:
+        verbose_name = _("Survey")
+        verbose_name_plural = _("Surveys")
 
 
