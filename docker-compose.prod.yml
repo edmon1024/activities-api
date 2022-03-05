@@ -21,7 +21,7 @@ services:
       dockerfile: ./Dockerfile
     command: bash -c "python manage.py collectstatic --no-input;
       python manage.py migrate;
-      gunicorn activities.wsgi:application -b 0.0.0.0:8000"
+      gunicorn project.wsgi:application -b 0.0.0.0:8000"
     volumes:
       - ./api/staticfiles:/code/staticfiles
       - ./api/media:/code/media
