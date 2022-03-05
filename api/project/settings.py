@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 import json
 from distutils.util import strtobool
+from django.utils.translation import ugettext_lazy as _
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -27,7 +28,7 @@ SECRET_KEY = '$ri3g(qa*t(-*e+%!&6kf#-0ncz4lyn2_313!4n0xx_%6y%d9q'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(strtobool(os.getenv("DEBUG", False)))
 
-ALLOWED_HOSTS = json.loads(os.getenv("ALLOWED_HOSTS"))
+ALLOWED_HOSTS = json.loads(os.getenv("ALLOWED_HOSTS", ["*"]))
 
 
 # Application definition
@@ -42,11 +43,16 @@ INSTALLED_APPS = [
  
     'rest_framework',   
     'django_filters',
+    'django_extensions',
+    'drf_yasg',
+
+    'activities',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -112,7 +118,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'es-mx'
+LANGUAGE_CODE = 'en-US'
+LANGUAGES = [
+  ('en-US', _('English')),
+  ('es-MX', _('Spanish')),
+]
 
 TIME_ZONE = 'America/Mexico_City'
 
@@ -133,7 +143,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 ADMINS = json.loads(os.getenv("ADMINS", []))
-MANAGERS = json.loads(os.getenv("ADMINS", []))
+MANAGERS = json.loads(os.getenv("MANAGERS", []))
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -143,4 +153,7 @@ REST_FRAMEWORK = {
     ]
 }
 
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
 

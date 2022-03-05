@@ -130,3 +130,5 @@ dmypy.json
 
 staticfiles/
 media/
+
+*.sw*
