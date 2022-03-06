@@ -1,7 +1,8 @@
 from django.utils import timezone
 import datetime
 from django.shortcuts import render
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, status
+from rest_framework.response import Response
 
 from activities.models import (
     Property,
@@ -10,8 +11,9 @@ from activities.models import (
 )
 from activities.serializers import (
     PropertyListSerializer,
-    ActivitySerializer,
-    SurveyRetrieveSerializer,
+    ActivityListSerializer,
+    ActivityCreateSerializer,
+    SurveySerializer,
 )
 from activities.filters import ActivityFilter
 
@@ -22,10 +24,18 @@ class PropertyViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = PropertyListSerializer
 
 
-class ActivityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class ActivityViewSet(mixins.ListModelMixin, 
+                      mixins.CreateModelMixin,
+                      viewsets.GenericViewSet):
     queryset = Activity.objects.all()
-    serializer_class = ActivitySerializer
+    serializer_class = ActivityListSerializer
     filter_class = ActivityFilter
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return ActivityCreateSerializer
+
+        return self.serializer_class
 
     def get_queryset(self):
         pk = self.kwargs.get("pk",None)
@@ -49,7 +59,7 @@ class ActivityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class SurveyViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Survey.objects.all()
-    serializer_class = SurveyRetrieveSerializer
+    serializer_class = SurveySerializer
 
 
 

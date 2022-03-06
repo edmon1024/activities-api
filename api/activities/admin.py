@@ -24,18 +24,18 @@ class PropertyAdmin(admin.ModelAdmin):
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
     list_display = (
-        "id","property","schedule","title","status",
+        "id","property_id","schedule","title","status",
         "created_at","updated_at",
     )
     fields = (
-        "id","property","schedule","title","status",
+        "id","property_id","schedule","title","status",
         "created_at","updated_at",
     )
     readonly_fields = ("id","created_at","updated_at",)
     search_fields = ("title","status",)
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related("property")
+        return super().get_queryset(request).select_related("property_id")
 
 
 @admin.register(Survey)

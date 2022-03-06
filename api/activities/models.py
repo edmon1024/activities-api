@@ -1,10 +1,12 @@
 from django.db import models
+from django.utils import timezone
 from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext_lazy as _
 from activities.abstract_models import (
     AbstractCommonInfo,
     AbstractCreatedUpdatedAt,
 )
+
 
 
 class Property(AbstractCommonInfo, AbstractCreatedUpdatedAt):
@@ -33,6 +35,7 @@ class Property(AbstractCommonInfo, AbstractCreatedUpdatedAt):
         blank=False,
         verbose_name=_("Status"),
         choices=STATUS_CHOICES,
+        default="active",
     )
 
     def __str__(self):
@@ -44,12 +47,14 @@ class Property(AbstractCommonInfo, AbstractCreatedUpdatedAt):
 
 
 class Activity(AbstractCommonInfo, AbstractCreatedUpdatedAt):
-    property = models.ForeignKey(
+    property_id = models.ForeignKey(
         "activities.Property",
         on_delete=models.CASCADE,
         null=False,
         related_name="activities",
         verbose_name=_("Property"),
+        db_column="property_id",
+        default=None,
     )
     schedule = models.DateTimeField(
         null=False,
@@ -67,6 +72,7 @@ class Activity(AbstractCommonInfo, AbstractCreatedUpdatedAt):
         blank=False,
         verbose_name=_("Status"),
         choices=STATUS_CHOICES,
+        default="active",
     )
 
     def __str__(self):
@@ -75,6 +81,24 @@ class Activity(AbstractCommonInfo, AbstractCreatedUpdatedAt):
     class Meta:
         verbose_name = _("Activity")
         verbose_name_plural = _("Activities")
+
+    def condition(self):
+        if self.status == "done":
+            return "Finalizada"
+
+        if self.status == "active":
+            now = timezone.now()
+
+            if self.schedule >= now:
+                return "Pendiente a realizar"
+
+            if self.schedule < now:
+                return "Atrasada"
+
+        return ""
+
+    condition.short_description = _("Condition")
+    condition = property(condition)
 
 
 class Survey(AbstractCreatedUpdatedAt):
