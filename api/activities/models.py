@@ -23,6 +23,18 @@ class Property(AbstractCommonInfo, AbstractCreatedUpdatedAt):
         verbose_name=_("Disabled at"),
     )
 
+    STATUS_CHOICES = (
+        ('active', _('Active')),
+        ('disabled', _('Disabled')),
+    )
+    status = models.CharField(
+        max_length=35,
+        null=False,
+        blank=False,
+        verbose_name=_("Status"),
+        choices=STATUS_CHOICES,
+    )
+
     def __str__(self):
         return self.title
 
@@ -42,6 +54,19 @@ class Activity(AbstractCommonInfo, AbstractCreatedUpdatedAt):
     schedule = models.DateTimeField(
         null=False,
         verbose_name=_("Schedule"),
+    )
+
+    STATUS_CHOICES = (
+        ('active', _('Active')),
+        ('done', _('Done')),
+    )
+
+    status = models.CharField(
+        max_length=35,
+        null=False,
+        blank=False,
+        verbose_name=_("Status"),
+        choices=STATUS_CHOICES,
     )
 
     def __str__(self):

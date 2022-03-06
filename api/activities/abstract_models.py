@@ -10,12 +10,6 @@ class AbstractCommonInfo(models.Model):
         blank=False,
         verbose_name=_("Title"),
     )
-    status = models.CharField(
-        max_length=35,
-        null=False,
-        blank=False,
-        verbose_name=_("Status"),
-    )
 
     class Meta:
         abstract = True
