@@ -51,8 +51,8 @@ class ActivityViewSet(mixins.ListModelMixin,
             return self.queryset.all()
 
         now = timezone.now()
-        start_date = now - datetime.timedelta(3)
-        end_date = now + datetime.timedelta(14)
+        start_date = now - datetime.timedelta(days=3)
+        end_date = now + datetime.timedelta(days=14)
 
         return self.queryset.filter(schedule__range=(start_date, end_date))
 
