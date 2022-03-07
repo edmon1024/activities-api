@@ -64,6 +64,7 @@ class Activity(AbstractCommonInfo, AbstractCreatedUpdatedAt):
     STATUS_CHOICES = (
         ('active', _('Active')),
         ('done', _('Done')),
+        ('cancelled', _('Cancelled')),
     )
 
     status = models.CharField(

@@ -1,12 +1,12 @@
 from rest_framework import serializers
 from django.utils.translation import ugettext_lazy as _
-import datetime
 
 from activities.models import (
     Property,
     Activity,
     Survey,
 )
+from activities.utils.validations import is_available_schedule
 
 
 class SurveySerializer(serializers.ModelSerializer):
@@ -64,22 +64,14 @@ class ActivityCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         survey_data = validated_data.pop("survey")
         property_data = validated_data.get("property_id")
+        schedule = validated_data.get("schedule")
 
         if property_data.status != "active":
             raise serializers.ValidationError({
                 "property_id": _("The activity cannot be created if the property is disabled"),
             })
 
-        schedule = validated_data.get("schedule")
-        schedule_start = schedule - datetime.timedelta(minutes=60)
-        schedule_end = schedule + datetime.timedelta(minutes=60)
-
-        activities = Activity.objects.filter(
-            property_id=property_data,
-            schedule__range=(schedule_start, schedule_end),
-        ).count()
-
-        if activities > 0:
+        if not is_available_schedule(schedule, property_data):
             raise serializers.ValidationError(
                 _("Activities cannot be created on the same date and time as another activity")
             )
@@ -89,5 +81,11 @@ class ActivityCreateSerializer(serializers.ModelSerializer):
 
         return activity
 
+
+class RescheduleActivitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Activity
+        fields = ('id','schedule',)
+        read_only_fields = ('id',)
 
 

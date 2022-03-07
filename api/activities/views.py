@@ -1,8 +1,10 @@
 from django.utils import timezone
 import datetime
-from django.shortcuts import render
+from django.utils.translation import ugettext_lazy as _
 from rest_framework import mixins, viewsets, status
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from drf_yasg.utils import swagger_auto_schema
 
 from activities.models import (
     Property,
@@ -14,8 +16,10 @@ from activities.serializers import (
     ActivityListSerializer,
     ActivityCreateSerializer,
     SurveySerializer,
+    RescheduleActivitySerializer,
 )
 from activities.filters import ActivityFilter
+from activities.utils.validations import is_available_schedule
 
 
 
@@ -34,6 +38,9 @@ class ActivityViewSet(mixins.ListModelMixin,
     def get_serializer_class(self):
         if self.action == "create":
             return ActivityCreateSerializer
+
+        if self.action == "reschedule":
+            return RescheduleActivitySerializer
 
         return self.serializer_class
 
@@ -55,6 +62,43 @@ class ActivityViewSet(mixins.ListModelMixin,
         end_date = now + datetime.timedelta(days=14)
 
         return self.queryset.filter(schedule__range=(start_date, end_date))
+
+    @action(detail=True, methods=['patch'])
+    def reschedule(self, request, pk=None):
+        obj = Activity.objects.filter(pk=pk).first()
+
+        serializer = self.get_serializer(obj, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            if obj.status == "cancelled":
+                return Response(
+                    {
+                        "status": _("Cancelled activities cannot be rescheduled"),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            verify = is_available_schedule(
+                serializer.validated_data["schedule"], 
+                obj.property_id, 
+                excluded_ids=[obj.id]
+            )
+
+            if not verify:
+                return Response(
+                    {
+                        "schedule": _("Activities cannot be created on the same date and time as another activity"),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            serializer.save()
+
+            return Response(serializer.data)
+
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class SurveyViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
