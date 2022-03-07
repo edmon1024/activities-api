@@ -88,4 +88,6 @@ class RescheduleActivitySerializer(serializers.ModelSerializer):
         fields = ('id','schedule',)
         read_only_fields = ('id',)
 
+class CancelledActivitySerializer(serializers.Serializer):
+    pass
 

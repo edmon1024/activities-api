@@ -17,6 +17,7 @@ from activities.serializers import (
     ActivityCreateSerializer,
     SurveySerializer,
     RescheduleActivitySerializer,
+    CancelledActivitySerializer,
 )
 from activities.filters import ActivityFilter
 from activities.utils.validations import is_available_schedule
@@ -41,6 +42,9 @@ class ActivityViewSet(mixins.ListModelMixin,
 
         if self.action == "reschedule":
             return RescheduleActivitySerializer
+
+        if self.action == "cancelled":
+            return CancelledActivitySerializer
 
         return self.serializer_class
 
@@ -99,6 +103,33 @@ class ActivityViewSet(mixins.ListModelMixin,
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def cancelled(self, request, pk=None):
+        obj = Activity.objects.filter(pk=pk).first()
+
+        if obj.status == "done":
+            return Response(
+                {
+                    "status": _("The status cannot be changed, the activity has done"),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if obj.status == "cancelled":
+            return Response(
+                {
+                    "status": _("The status cannot be changed, the activity has cancelled"),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        obj.status = "cancelled"
+        obj.save()
+
+        return Response({
+            "status": obj.status,
+        })
 
 
 class SurveyViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
