@@ -1,0 +1,44 @@
+version: '3.7'
+
+services:
+  activities_dev_db:
+    image: postgres:10.15-alpine
+    container_name: activities_dev_db
+    environment:
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_USER: ${DB_USER}
+        POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - /var/lib/postgresql/activities-dev-docker:/var/lib/postgresql/data
+    networks:
+      activities_dev_net:
+        ipv4_address: 172.18.0.2
+
+  activities_dev_api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    image: activities-dev-api:latest
+    container_name: activities_dev_api
+    env_file:
+      - .env
+    volumes:
+      - ./api:/code
+    links:
+      - activities_dev_db:db
+    depends_on:
+      - activities_dev_db
+    networks:
+      activities_dev_net:
+        ipv4_address: 172.18.0.3
+
+networks:
+  activities_dev_net:
+    name: activities_dev_net
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.0.0/29
+
+

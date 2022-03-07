@@ -1,0 +1,86 @@
+# Activities API.
+# Copyright (C) 2022
+# This file is distributed under the same license as the activities-api package.
+# Edmundo Andrade <edmon.af@gmail.com>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-03-05 16:33-0600\n"
+"PO-Revision-Date: 2022-03-05 15:25-0600\n"
+"Last-Translator: Edmundo Andrade <edmon.af@gmail.com>\n"
+"Language-Team: Edmundo Andrade <edmon.af@gmail.com>\n"
+"Language: es_MX\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: activities/abstract_models.py:11
+msgid "Title"
+msgstr "Título"
+
+#: activities/abstract_models.py:17
+msgid "Status"
+msgstr "Estatus"
+
+#: activities/abstract_models.py:27
+msgid "Created at"
+msgstr "Creado en"
+
+#: activities/abstract_models.py:31
+msgid "Updated at"
+msgstr "Actualizado en"
+
+#: activities/models.py:14
+msgid "Address"
+msgstr "Dirección"
+
+#: activities/models.py:19
+msgid "Description"
+msgstr "Descripción"
+
+#: activities/models.py:23
+msgid "Disabled at"
+msgstr "Desactivado en"
+
+#: activities/models.py:27 activities/models.py:37
+msgid "Property"
+msgstr "Propiedad"
+
+#: activities/models.py:28
+msgid "Properties"
+msgstr "Propiedades"
+
+#: activities/models.py:41
+msgid "Schedule"
+msgstr "Horario"
+
+#: activities/models.py:45 activities/models.py:55
+msgid "Activity"
+msgstr "Actividad"
+
+#: activities/models.py:46
+msgid "Activities"
+msgstr "Actividades"
+
+#: activities/models.py:59
+msgid "Answers"
+msgstr "Respuestas"
+
+#: activities/models.py:64
+msgid "Survey"
+msgstr "Encuesta"
+
+#: activities/models.py:65
+msgid "Surveys"
+msgstr "Encuestas"
+
+#: project/settings.py:123
+msgid "English"
+msgstr "Inglés"
+
+#: project/settings.py:124
+msgid "Spanish"
+msgstr "Español"
