@@ -29,7 +29,7 @@ class PropertySerializer(serializers.ModelSerializer):
 
 
 class ActivityListSerializer(serializers.ModelSerializer):
-    property =  PropertySerializer(
+    property = PropertySerializer(
         many=False,
         source="property_id",
     )

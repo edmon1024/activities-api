@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from drf_yasg.utils import swagger_auto_schema
 
 from activities.models import (
     Property,
@@ -59,7 +58,7 @@ class ActivityViewSet(mixins.ListModelMixin,
         schedule_after = self.request.query_params.get("schedule_after", None)
         schedule_before = self.request.query_params.get("schedule_before", None)
 
-        if status != None or schedule_after != None or schedule_before != None:
+        if status is not None or schedule_after is not None or schedule_before is not None:
             return self.queryset.all()
 
         now = timezone.now()
