@@ -1,6 +1,7 @@
 from django.utils import timezone
 import datetime
 from django.utils.translation import ugettext_lazy as _
+from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -69,7 +70,7 @@ class ActivityViewSet(mixins.ListModelMixin,
 
     @action(detail=True, methods=['patch'])
     def reschedule(self, request, pk=None):
-        obj = Activity.objects.filter(pk=pk).first()
+        obj = get_object_or_404(Activity.objects.all(), pk=pk)
 
         serializer = self.get_serializer(obj, data=request.data, partial=True)
 
@@ -106,7 +107,7 @@ class ActivityViewSet(mixins.ListModelMixin,
 
     @action(detail=True, methods=['post'])
     def cancelled(self, request, pk=None):
-        obj = Activity.objects.filter(pk=pk).first()
+        obj = get_object_or_404(Activity.objects.all(), pk=pk)
 
         if obj.status == "done":
             return Response(

@@ -17,6 +17,7 @@ from django.conf.urls import url, include
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken import views as authtoken_views
 
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -41,6 +42,8 @@ urlpatterns = [
     url(r'^api/v1/swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     url(r'^api/v1/swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     url(r'^api/v1/redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
+    url(r'^api/v1/auth/', authtoken_views.obtain_auth_token)
 ]
 
 

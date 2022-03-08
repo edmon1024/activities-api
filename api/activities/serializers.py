@@ -29,7 +29,10 @@ class PropertySerializer(serializers.ModelSerializer):
 
 
 class ActivityListSerializer(serializers.ModelSerializer):
-    property_id =  PropertySerializer(many=False)
+    property =  PropertySerializer(
+        many=False,
+        source="property_id",
+    )
     survey = serializers.HyperlinkedRelatedField(
         many=False,
         read_only=True,
@@ -40,7 +43,7 @@ class ActivityListSerializer(serializers.ModelSerializer):
         model = Activity
         fields = (
             'id','schedule','title','created_at','status',
-            'condition','property_id','survey',
+            'condition','property','survey',
         )
         read_only_fields = ('id','condition','created_at',)
 
