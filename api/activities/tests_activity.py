@@ -142,15 +142,15 @@ class ActivitytestCase(TestCase):
         response = client.post(
             "/api/v1/activity/",
             {
-            	"property_id": self.p_2.id,
-            	"schedule": "2022-03-20T08:00:00-06:00",
-            	"title": "activity 5",
-            	"survey": {
-            		"answers": {
-            			"test1": "answer1",
-            			"test2": "answer2",
-            		}
-            	}
+              "property_id": self.p_2.id,
+              "schedule": "2022-03-20T08:00:00-06:00",
+              "title": "activity 5",
+              "survey": {
+                "answers": {
+                  "test1": "answer1",
+                  "test2": "answer2",
+                }
+              }
             },
         )
 
