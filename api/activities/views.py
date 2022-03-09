@@ -74,6 +74,15 @@ class ActivityViewSet(mixins.ListModelMixin,
         serializer = self.get_serializer(obj, data=request.data, partial=True)
 
         if serializer.is_valid():
+            schedule = serializer.validated_data.get("schedule","")
+            if not bool(schedule):
+                return Response(
+                    {
+                        "schedule": _("The field is required"),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             if obj.status == "cancelled":
                 return Response(
                     {
