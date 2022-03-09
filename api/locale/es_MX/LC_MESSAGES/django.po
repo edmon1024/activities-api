@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-05 16:33-0600\n"
+"POT-Creation-Date: 2022-03-09 01:03-0600\n"
 "PO-Revision-Date: 2022-03-05 15:25-0600\n"
 "Last-Translator: Edmundo Andrade <edmon.af@gmail.com>\n"
 "Language-Team: Edmundo Andrade <edmon.af@gmail.com>\n"
@@ -21,66 +21,112 @@ msgstr ""
 msgid "Title"
 msgstr "Título"
 
-#: activities/abstract_models.py:17
-msgid "Status"
-msgstr "Estatus"
-
-#: activities/abstract_models.py:27
+#: activities/abstract_models.py:21
 msgid "Created at"
 msgstr "Creado en"
 
-#: activities/abstract_models.py:31
+#: activities/abstract_models.py:25
 msgid "Updated at"
 msgstr "Actualizado en"
 
-#: activities/models.py:14
-msgid "Address"
-msgstr "Dirección"
-
-#: activities/models.py:19
-msgid "Description"
-msgstr "Descripción"
-
-#: activities/models.py:23
-msgid "Disabled at"
-msgstr "Desactivado en"
-
-#: activities/models.py:27 activities/models.py:37
-msgid "Property"
-msgstr "Propiedad"
-
-#: activities/models.py:28
-msgid "Properties"
-msgstr "Propiedades"
-
-#: activities/models.py:41
-msgid "Schedule"
-msgstr "Horario"
-
-#: activities/models.py:45 activities/models.py:55
+#: activities/apps.py:7 activities/models.py:83 activities/models.py:111
 msgid "Activity"
 msgstr "Actividad"
 
-#: activities/models.py:46
+#: activities/apps.py:8 activities/models.py:84
 msgid "Activities"
 msgstr "Actividades"
 
-#: activities/models.py:59
+#: activities/models.py:16
+msgid "Address"
+msgstr "Dirección"
+
+#: activities/models.py:21
+msgid "Description"
+msgstr "Descripción"
+
+#: activities/models.py:25
+msgid "Disabled at"
+msgstr "Desactivado en"
+
+#: activities/models.py:29 activities/models.py:65
+msgid "Active"
+msgstr "Activo"
+
+#: activities/models.py:30
+msgid "Disabled"
+msgstr "Deshabilitado"
+
+#: activities/models.py:36 activities/models.py:74
+msgid "Status"
+msgstr "Estatus"
+
+#: activities/models.py:45 activities/models.py:55
+msgid "Property"
+msgstr "Propiedad"
+
+#: activities/models.py:46
+msgid "Properties"
+msgstr "Propiedades"
+
+#: activities/models.py:61
+msgid "Schedule"
+msgstr "Horario"
+
+#: activities/models.py:66
+msgid "Done"
+msgstr "Finalizado"
+
+#: activities/models.py:67
+msgid "Cancelled"
+msgstr "Cancelado"
+
+#: activities/models.py:101
+msgid "Condition"
+msgstr "Condición"
+
+#: activities/models.py:115
 msgid "Answers"
 msgstr "Respuestas"
 
-#: activities/models.py:64
+#: activities/models.py:123
 msgid "Survey"
 msgstr "Encuesta"
 
-#: activities/models.py:65
+#: activities/models.py:124
 msgid "Surveys"
 msgstr "Encuestas"
 
-#: project/settings.py:123
+#: activities/serializers.py:74
+msgid "The activity cannot be created if the property is disabled"
+msgstr "La actividad no se puede crear si la propiedad esta desactivada"
+
+#: activities/serializers.py:79 activities/views.py:103
+msgid ""
+"Activities cannot be created on the same date and time as another activity"
+msgstr ""
+"Las Actividades no se puede crear en la misma fecha y hora de otra actividad"
+
+#: activities/views.py:81
+msgid "The field is required"
+msgstr "El campo es requerido"
+
+#: activities/views.py:89
+msgid "Cancelled activities cannot be rescheduled"
+msgstr "Las actividades canceladas no se pueden reagender"
+
+#: activities/views.py:123
+msgid "The status cannot be changed, the activity has done"
+msgstr "El estatus no se puede cambiar, la actividad ha finalizado"
+
+#: activities/views.py:131
+msgid "The status cannot be changed, the activity has cancelled"
+msgstr "El estatus no se puede cambiar, la actividad esta cancelada"
+
+#: project/settings.py:124
 msgid "English"
 msgstr "Inglés"
 
-#: project/settings.py:124
+#: project/settings.py:125
 msgid "Spanish"
 msgstr "Español"

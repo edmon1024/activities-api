@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '$ri3g(qa*t(-*e+%!&6kf#-0ncz4lyn2_313!4n0xx_%6y%d9q'
+SECRET_KEY = os.getenv("SECRET_KEY","")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(strtobool(os.getenv("DEBUG", False)))
@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'drf_yasg',
 
-    'activities',
+    'activities.apps.ActivitiesConfig',
 ]
 
 MIDDLEWARE = [
@@ -119,11 +119,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'en-US'
 LANGUAGES = [
   ('en-US', _('English')),
   ('es-MX', _('Spanish')),
 ]
+LANGUAGE_CODE = LANGUAGES[0][0]
 
 TIME_ZONE = 'America/Mexico_City'
 
