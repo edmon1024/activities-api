@@ -26,6 +26,8 @@ class ActivityTestCase(TestCase):
         user.set_password("1234567890***")
         user.save()
 
+        self._client = self._get_client()
+
         self.now = timezone.now()
 
         p_1 = Property.objects.create(
@@ -48,14 +50,42 @@ class ActivityTestCase(TestCase):
         )
         p_3.save()
 
+        self.p_1 = p_1
+        self.p_2 = p_2
+        self.p_3 = p_3
+
+    def _get_token(self):
+        client = APIClient()
+
+        response = client.post(
+            "/api/v1/auth/", {
+                "username": "eandrade",
+                "password": "1234567890***"
+            },
+        )
+
+        result = json.loads(response.content)
+
+        return result["token"]
+
+    def _get_client(self):
+        token = self._get_token()
+
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION="Token "+ token)
+    
+        return client
+        
+
+    def _activities_initial_data(self):
         a_1 = Activity.objects.create(
-            property_id=p_1,
+            property_id=self.p_1,
             schedule=self.now + datetime.timedelta(days=2),
             title="Actividad 1",
         )
         a_1.save()
         a_2 = Activity.objects.create(
-            property_id=p_2,
+            property_id=self.p_2,
             schedule=self.now + datetime.timedelta(days=7),
             title="Actividad 2",
         )
@@ -78,24 +108,6 @@ class ActivityTestCase(TestCase):
         )
         s_2.save()
 
-        client = APIClient()
-
-        response = client.post(
-            "/api/v1/auth/", {
-                "username": "eandrade",
-                "password": "1234567890***"
-            },
-        )
-
-        result = json.loads(response.content)
-
-        self.token = result["token"]
-        self.user = user
-        self.p_1 = p_1
-        self.p_2 = p_2
-        self.p_3 = p_3
-
-    def _activities_for_testing(self):
         p_9 = Property.objects.create(
             title="Propiedad buenavista",
             address="Calle prueba 900",
@@ -163,10 +175,7 @@ class ActivityTestCase(TestCase):
         )
 
     def test_list_properties(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-    
-        response = client.get("/api/v1/property/")
+        response = self._client.get("/api/v1/property/")
 
         result = json.loads(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -181,15 +190,14 @@ class ActivityTestCase(TestCase):
             break
 
     def test_list_activities(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
+        self._activities_initial_data()
 
-        response = client.get("/api/v1/activity/")
+        response = self._client.get("/api/v1/activity/")
 
         result = json.loads(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
-        self.assertEqual(result["count"], 2)
+        self.assertEqual(result["count"], 3)
     
         for item in result["results"]:
             self.assertIn("id", item)
@@ -206,10 +214,7 @@ class ActivityTestCase(TestCase):
             break
 
     def test_create_activity_success(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-    
-        response = client.post(
+        response = self._client.post(
             "/api/v1/activity/",
             {
               "property_id": self.p_2.id,
@@ -239,10 +244,7 @@ class ActivityTestCase(TestCase):
         self.assertIn("created_at", result)
     
     def test_reschedule_activity_not_found(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
-        response = client.patch(
+        response = self._client.patch(
             "/api/v1/activity/10000/reschedule/",
             {
               "schedule": self.now + datetime.timedelta(days=9, hours=1),
@@ -255,9 +257,6 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result["detail"], "Not found.")
 
     def test_reschedule_activity_success(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
         p = Property.objects.create(
             title="Propiedad 4",
             address="Calle prueba 400",
@@ -280,7 +279,7 @@ class ActivityTestCase(TestCase):
         )
         s.save()
 
-        response = client.patch(
+        response = self._client.patch(
             f"/api/v1/activity/{a.id}/reschedule/",
             {
               "schedule": self.now + datetime.timedelta(days=1, hours=10),
@@ -295,9 +294,6 @@ class ActivityTestCase(TestCase):
         self.assertIn("schedule", result)
 
     def test_reschedule_activity_w_property_disabled(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
         p = Property.objects.create(
             title="Propiedad 5",
             address="Calle prueba 500",
@@ -321,7 +317,7 @@ class ActivityTestCase(TestCase):
         )
         s.save()
 
-        response = client.patch(
+        response = self._client.patch(
             f"/api/v1/activity/{a.id}/reschedule/",
             {
               "schedule": self.now + datetime.timedelta(days=6, hours=7),
@@ -334,9 +330,6 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result["status"], "Cancelled activities cannot be rescheduled")
 
     def test_cancelled_activity_success(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
         p = Property.objects.create(
             title="Propiedad 6",
             address="Calle prueba 600",
@@ -360,7 +353,7 @@ class ActivityTestCase(TestCase):
         )
         s.save()
 
-        response = client.post(f"/api/v1/activity/{a.id}/cancelled/")
+        response = self._client.post(f"/api/v1/activity/{a.id}/cancelled/")
 
         result = json.loads(response.content)
 
@@ -369,9 +362,6 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result["status"], "cancelled")
 
     def test_cancelled_activity_status_cannot_changed(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
         p = Property.objects.create(
             title="Propiedad 7",
             address="Calle prueba 700",
@@ -396,7 +386,7 @@ class ActivityTestCase(TestCase):
         )
         s.save()
 
-        response = client.post(f"/api/v1/activity/{a.id}/cancelled/")
+        response = self._client.post(f"/api/v1/activity/{a.id}/cancelled/")
 
         result = json.loads(response.content)
 
@@ -404,9 +394,6 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result["status"], "The status cannot be changed, the activity has cancelled")
 
     def test_retrieve_survey_success(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
         p = Property.objects.create(
             title="Propiedad 8",
             address="Calle prueba 800",
@@ -430,7 +417,7 @@ class ActivityTestCase(TestCase):
         )
         s.save()
 
-        response = client.get(f"/api/v1/survey/{s.id}/")
+        response = self._client.get(f"/api/v1/survey/{s.id}/")
 
         result = json.loads(response.content)
 
@@ -439,10 +426,7 @@ class ActivityTestCase(TestCase):
         self.assertIn("answers", result)
 
     def test_retrieve_survey_not_found(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
-        response = client.get("/api/v1/survey/1000/")
+        response = self._client.get("/api/v1/survey/1000/")
 
         result = json.loads(response.content)
 
@@ -450,12 +434,9 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result["detail"], "Not found.")
 
     def test_list_activities_default_filter(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
+        self._activities_initial_data()
 
-        self._activities_for_testing()
-
-        response = client.get("/api/v1/activity/")
+        response = self._client.get("/api/v1/activity/")
 
         result = json.loads(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -477,12 +458,9 @@ class ActivityTestCase(TestCase):
             break
 
     def test_list_activities_w_status_unknown_filter(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
+        self._activities_initial_data()
 
-        self._activities_for_testing()
-
-        response = client.get("/api/v1/activity/?status=unknown")
+        response = self._client.get("/api/v1/activity/?status=unknown")
 
         result = json.loads(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -491,12 +469,9 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result["results"], [])
 
     def test_list_activities_w_status_filter(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
+        self._activities_initial_data()
 
-        self._activities_for_testing()
-
-        response = client.get("/api/v1/activity/?status=active")
+        response = self._client.get("/api/v1/activity/?status=active")
 
         result = json.loads(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -518,10 +493,7 @@ class ActivityTestCase(TestCase):
             break
 
     def test_list_activities_w_schedule_range_filter_empty(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
-        self._activities_for_testing()
+        self._activities_initial_data()
 
         schedule_after = self.now - datetime.timedelta(days=30)
         schedule_after = schedule_after.strftime("%Y-%m-%d %H:%M")
@@ -529,7 +501,7 @@ class ActivityTestCase(TestCase):
         schedule_before = self.now - datetime.timedelta(days=28)
         schedule_before = schedule_before.strftime("%Y-%m-%d %H:%M")
 
-        response = client.get(f"/api/v1/activity/?schedule_after={schedule_after}&schedule_before={schedule_before}")
+        response = self._client.get(f"/api/v1/activity/?schedule_after={schedule_after}&schedule_before={schedule_before}")
 
         result = json.loads(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -537,10 +509,7 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result["count"], 0)
 
     def test_list_activities_w_schedule_range_filter_w_data(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
-        self._activities_for_testing()
+        self._activities_initial_data()
 
         schedule_after = self.now + datetime.timedelta(days=20)
         schedule_after = schedule_after.strftime("%Y-%m-%d %H:%M")
@@ -548,7 +517,7 @@ class ActivityTestCase(TestCase):
         schedule_before = self.now + datetime.timedelta(days=22)
         schedule_before = schedule_before.strftime("%Y-%m-%d %H:%M")
 
-        response = client.get(f"/api/v1/activity/?schedule_after={schedule_after}&schedule_before={schedule_before}")
+        response = self._client.get(f"/api/v1/activity/?schedule_after={schedule_after}&schedule_before={schedule_before}")
 
         result = json.loads(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -570,10 +539,7 @@ class ActivityTestCase(TestCase):
             break
 
     def test_list_activities_w_status_and_schedule_range_filter_empty(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
-        self._activities_for_testing()
+        self._activities_initial_data()
 
         schedule_after = self.now + datetime.timedelta(days=20)
         schedule_after = schedule_after.strftime("%Y-%m-%d %H:%M")
@@ -581,7 +547,7 @@ class ActivityTestCase(TestCase):
         schedule_before = self.now + datetime.timedelta(days=22)
         schedule_before = schedule_before.strftime("%Y-%m-%d %H:%M")
 
-        response = client.get(f"/api/v1/activity/?status=cancelled&schedule_after={schedule_after}&schedule_before={schedule_before}")
+        response = self._client.get(f"/api/v1/activity/?status=cancelled&schedule_after={schedule_after}&schedule_before={schedule_before}")
 
         result = json.loads(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -589,10 +555,7 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result["count"], 0)
 
     def test_list_activities_w_status_and_schedule_range_filter_w_data(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
-        self._activities_for_testing()
+        self._activities_initial_data()
 
         schedule_after = self.now + datetime.timedelta(days=20)
         schedule_after = schedule_after.strftime("%Y-%m-%d %H:%M")
@@ -600,7 +563,7 @@ class ActivityTestCase(TestCase):
         schedule_before = self.now + datetime.timedelta(days=22)
         schedule_before = schedule_before.strftime("%Y-%m-%d %H:%M")
 
-        response = client.get(f"/api/v1/activity/?status=active&schedule_after={schedule_after}&schedule_before={schedule_before}")
+        response = self._client.get(f"/api/v1/activity/?status=active&schedule_after={schedule_after}&schedule_before={schedule_before}")
 
         result = json.loads(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -622,10 +585,7 @@ class ActivityTestCase(TestCase):
             break
 
     def test_list_activities_w_schedule_range_format_error(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
-        self._activities_for_testing()
+        self._activities_initial_data()
 
         schedule_after = self.now + datetime.timedelta(days=20)
         schedule_after = schedule_after.strftime("%Y/%m/%d %H:%M")
@@ -633,7 +593,7 @@ class ActivityTestCase(TestCase):
         schedule_before = self.now + datetime.timedelta(days=22)
         schedule_before = schedule_before.strftime("%Y/%m/%d %H:%M")
 
-        response = client.get(f"/api/v1/activity/?schedule_after={schedule_after}&schedule_before={schedule_before}")
+        response = self._client.get(f"/api/v1/activity/?schedule_after={schedule_after}&schedule_before={schedule_before}")
 
         result = json.loads(response.content)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -642,9 +602,6 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result["schedule"][0], "Enter a valid date/time.")
 
     def test_create_activity_w_property_disabled(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
         p = Property.objects.create(
             title="Propiedad A",
             address="Calle prueba A",
@@ -653,7 +610,7 @@ class ActivityTestCase(TestCase):
         )
         p.save()
 
-        response = client.post(
+        response = self._client.post(
             "/api/v1/activity/",
             {
               "property_id": p.id,
@@ -676,9 +633,6 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result["property_id"], "The activity cannot be created if the property is disabled")
 
     def test_create_activity_w_schedule_problem(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
         p = Property.objects.create(
             title="Propiedad A",
             address="Calle prueba A",
@@ -702,7 +656,7 @@ class ActivityTestCase(TestCase):
         )
         s.save()
 
-        response = client.post(
+        response = self._client.post(
             "/api/v1/activity/",
             {
               "property_id": p.id,
@@ -724,10 +678,7 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result[0], "Activities cannot be created on the same date and time as another activity")
 
     def test_create_activity_required_field_missing(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
-        response = client.post(
+        response = self._client.post(
             "/api/v1/activity/",
             {},
         )
@@ -747,9 +698,6 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result["survey"][0], "This field is required.")
 
     def test_reschedule_activity_w_schedule_problem(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
         p = Property.objects.create(
             title="Propiedad A",
             address="Calle prueba A",
@@ -789,7 +737,7 @@ class ActivityTestCase(TestCase):
         )
         s_1.save()
 
-        response = client.patch(
+        response = self._client.patch(
             f"/api/v1/activity/{a_1.id}/reschedule/",
             {
               "schedule": self.now + datetime.timedelta(days=10, minutes=25),
@@ -804,9 +752,6 @@ class ActivityTestCase(TestCase):
         self.assertEqual(result["schedule"], "Activities cannot be created on the same date and time as another activity")
 
     def test_reschedule_activity_required_field_missing_schedule(self):
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION="Token "+ self.token)
-
         p = Property.objects.create(
             title="Propiedad A",
             address="Calle prueba A",
@@ -830,7 +775,7 @@ class ActivityTestCase(TestCase):
         )
         s.save()
 
-        response = client.patch(f"/api/v1/activity/{a.id}/reschedule/")
+        response = self._client.patch(f"/api/v1/activity/{a.id}/reschedule/")
 
         result = json.loads(response.content)
 
@@ -839,6 +784,150 @@ class ActivityTestCase(TestCase):
         self.assertIn("schedule",result)
         self.assertEqual(result["schedule"], "The field is required")
 
+    def test_list_activities_check_condition_finished(self):
+        p = Property.objects.create(
+            title="Propiedad A",
+            address="Calle prueba A",
+            description="Propiedad A",
+        )
+        p.save()
+
+        a = Activity.objects.create(
+            property_id=p,
+            schedule=self.now - datetime.timedelta(days=1),
+            title="Actividad 8",
+            status="done",
+        )
+        a.save()
+
+        s = Survey.objects.create(
+            activity=a,
+            answers={
+                "C": 1,
+                "D": 2,
+            }
+        )
+        s.save()
+
+        response = self._client.get("/api/v1/activity/")
+
+        result = json.loads(response.content)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(result["count"], 1)
+
+        item = result["results"][0]
+
+        self.assertIn("id", item)
+        self.assertIn("schedule", item)
+        self.assertIn("title", item)
+        self.assertIn("created_at", item)
+        self.assertIn("status", item)
+        self.assertEqual(item["status"], "done")
+        self.assertIn("condition", item)
+        self.assertEqual(item["condition"], "Finalizada")
+        self.assertIn("property", item)
+        self.assertIn("id", item["property"])
+        self.assertIn("title", item["property"])
+        self.assertIn("address", item["property"])
+        self.assertIn("survey", item)
+
+
+    def test_list_activities_check_condition_pending_to_do(self):
+        p = Property.objects.create(
+            title="Propiedad A",
+            address="Calle prueba A",
+            description="Propiedad A",
+        )
+        p.save()
+
+        a = Activity.objects.create(
+            property_id=p,
+            schedule=self.now + datetime.timedelta(days=1),
+            title="Actividad 8",
+            status="active",
+        )
+        a.save()
+
+        s = Survey.objects.create(
+            activity=a,
+            answers={
+                "C": 1,
+                "D": 2,
+            }
+        )
+        s.save()
+
+        response = self._client.get("/api/v1/activity/")
+
+        result = json.loads(response.content)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(result["count"], 1)
+
+        item = result["results"][0]
+
+        self.assertIn("id", item)
+        self.assertIn("schedule", item)
+        self.assertIn("title", item)
+        self.assertIn("created_at", item)
+        self.assertIn("status", item)
+        self.assertEqual(item["status"], "active")
+        self.assertIn("condition", item)
+        self.assertEqual(item["condition"], "Pendiente a realizar")
+        self.assertIn("property", item)
+        self.assertIn("id", item["property"])
+        self.assertIn("title", item["property"])
+        self.assertIn("address", item["property"])
+        self.assertIn("survey", item)
+
+    def test_list_activities_check_condition_late(self):
+        p = Property.objects.create(
+            title="Propiedad A",
+            address="Calle prueba A",
+            description="Propiedad A",
+        )
+        p.save()
+
+        a = Activity.objects.create(
+            property_id=p,
+            schedule=self.now - datetime.timedelta(minutes=45),
+            title="Actividad 8",
+            status="active",
+        )
+        a.save()
+
+        s = Survey.objects.create(
+            activity=a,
+            answers={
+                "C": 1,
+                "D": 2,
+            }
+        )
+        s.save()
+
+        response = self._client.get("/api/v1/activity/")
+
+        result = json.loads(response.content)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(result["count"], 1)
+
+        item = result["results"][0]
+
+        self.assertIn("id", item)
+        self.assertIn("schedule", item)
+        self.assertIn("title", item)
+        self.assertIn("created_at", item)
+        self.assertIn("status", item)
+        self.assertEqual(item["status"], "active")
+        self.assertIn("condition", item)
+        self.assertEqual(item["condition"], "Atrasada")
+        self.assertIn("property", item)
+        self.assertIn("id", item["property"])
+        self.assertIn("title", item["property"])
+        self.assertIn("address", item["property"])
+        self.assertIn("survey", item)
 
 
 
