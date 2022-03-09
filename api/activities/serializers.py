@@ -86,6 +86,8 @@ class ActivityCreateSerializer(serializers.ModelSerializer):
 
 
 class RescheduleActivitySerializer(serializers.ModelSerializer):
+    schedule = serializers.DateTimeField(required=True)
+
     class Meta:
         model = Activity
         fields = ('id','schedule',)

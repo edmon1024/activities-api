@@ -8,7 +8,7 @@ from rest_framework import status
 
 
 
-class ActivitytestCase(TestCase):
+class ActivityTestCase(TestCase):
     def setUp(self):
         user = User(
             email="edmon.af@gmail.com",
